@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgentProbe | break it before your users do</title>
+  <meta name="description" content="AgentProbe attacks AI agents, grades the damage and tells you what to fix.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="flash" id="flash" aria-hidden="true"></div>
+
+  <header class="bar">
+    <a class="mark" href="#rig" aria-label="AgentProbe, back to the rig">
+      <span>AGENT</span><span class="hot">PROBE</span>
+    </a>
+    <div class="status" aria-live="polite">
+      <i class="dot" id="statusDot"></i><span id="statusText">LAB ONLINE</span>
+    </div>
+  </header>
+
+  <div class="tape" aria-hidden="true">
+    <div class="tape-track">
+      <span>BREAK IT BEFORE YOUR USERS DO &#10005; INJECT &#10005; CONFUSE &#10005; LEAK &#10005; CRASH &#10005; GRADE &#10005; FIX &#10005;&nbsp;</span>
+      <span>BREAK IT BEFORE YOUR USERS DO &#10005; INJECT &#10005; CONFUSE &#10005; LEAK &#10005; CRASH &#10005; GRADE &#10005; FIX &#10005;&nbsp;</span>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero" id="rig" aria-label="Test rig">
+      <p class="giant" aria-hidden="true">BREAK<br>IT</p>
+      <canvas id="stage" role="img"
+        aria-label="3D view of the agent under test with seven attack categories orbiting it"></canvas>
+
+      <div class="hud tl">
+        <p class="label">STAGE</p>
+        <h2 id="stageName">STANDBY</h2>
+        <p class="sub" id="stageSub">Pick your weapons. Press fire.</p>
+      </div>
+
+      <div class="hud tr" aria-label="Live counters">
+        <div class="count"><b id="cFired">00</b><span>FIRED</span></div>
+        <div class="count pass"><b id="cPass">00</b><span>HELD</span></div>
+        <div class="count fail"><b id="cFail">00</b><span>BROKE</span></div>
+      </div>
+
+      <form class="panel rig" id="rigForm" autocomplete="off">
+        <h3 class="plate">01 / TEST RIG</h3>
+
+        <label class="field">
+          <span>TARGET URL</span>
+          <input id="targetUrl" type="url" required spellcheck="false">
+        </label>
+
+        <div class="duo">
+          <div class="field">
+            <span>TESTS / TYPE</span>
+            <div class="stepper" data-key="per">
+              <button type="button" data-d="-1" aria-label="Fewer tests per type">&minus;</button>
+              <output id="perOut">1</output>
+              <button type="button" data-d="1" aria-label="More tests per type">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <span>ROUNDS</span>
+            <div class="stepper" data-key="rounds">
+              <button type="button" data-d="-1" aria-label="Fewer rounds">&minus;</button>
+              <output id="roundsOut">2</output>
+              <button type="button" data-d="1" aria-label="More rounds">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <span>ATTACK TYPES</span>
+          <div class="chips" id="chips"></div>
+        </div>
+
+        <button class="fire" id="fireBtn" type="submit"><span id="fireText">FIRE</span></button>
+        <p class="err" id="errBox" role="alert" hidden></p>
+      </form>
+
+      <aside class="panel feed-wrap" aria-label="Live feed">
+        <h3 class="plate">02 / LIVE FEED</h3>
+        <ol class="feed" id="feed" role="log" aria-live="polite">
+          <li class="sys">Waiting for orders.</li>
+        </ol>
+      </aside>
+
+      <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
+    </section>
+
+    <section class="results" id="results" hidden aria-label="Damage report">
+      <div class="stripe" aria-hidden="true"></div>
+      <div class="wrap">
+        <h2 class="plate big">03 / DAMAGE REPORT</h2>
+
+        <div class="score-row">
+          <div class="score">
+            <p class="label">CORE SUITE PASS RATE</p>
+            <div class="score-num" id="scoreBox"><b id="scoreNum">0</b><span id="scoreUnit">%</span></div>
+            <p id="scoreSub" class="sub"></p>
+          </div>
+          <dl class="stats" id="stats"></dl>
+        </div>
+
+        <h3 class="plate">BY ATTACK TYPE</h3>
+        <ul class="bars" id="bars"></ul>
+
+        <h3 class="plate">INCIDENTS</h3>
+        <div class="cards" id="cards"></div>
+
+        <div class="two">
+          <div>
+            <h3 class="plate">SUPERVISOR LOG</h3>
+            <ol class="timeline" id="timeline"></ol>
+          </div>
+          <div>
+            <h3 class="plate">WHAT TO FIX</h3>
+            <ul class="fixes" id="fixes"></ul>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" id="dlBtn" href="#" download>DOWNLOAD REPORT .MD</a>
+          <button class="btn" id="copyBtn" type="button">COPY SUMMARY</button>
+          <button class="btn solid" id="againBtn" type="button">RUN AGAIN</button>
+        </div>
+        <p class="fine">
+          Grades come from an AI judge plus hard rules, so treat them as estimates, not proof.
+          To compare before and after a fix, replay the same tests from the command line with <code>--replay</code>.
+        </p>
+      </div>
+    </section>
+
+    <section class="how" aria-label="How it works">
+      <div class="wrap">
+        <h2 class="plate big">HOW IT WORKS</h2>
+        <ol class="steps">
+          <li><b>01</b><h4>WRITE</h4><p>A test-writer agent invents attacks: injections, unsafe asks, private data, garbage input.</p></li>
+          <li><b>02</b><h4>FIRE</h4><p>Each attack hits your agent over HTTP, exactly like a real user would.</p></li>
+          <li><b>03</b><h4>JUDGE</h4><p>Hard rules catch leaks and crashes. An AI judge grades the rest.</p></li>
+          <li><b>04</b><h4>PROBE</h4><p>A supervisor sends more attacks where it found cracks, then writes the report.</p></li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>AGENTPROBE</span>
+    <span>Only attacks hosts on your allow-list.</span>
+  </footer>
+
+  <script src="/static/script.js" defer></script>
+</body>
+</html>
