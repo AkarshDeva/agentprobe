@@ -1,0 +1,11 @@
+langgraph
+langchain-core
+langchain-groq
+langchain-google-genai
+pydantic
+python-dotenv
+requests
+fastapi
+uvicorn
+jinja2
+langgraph-checkpoint-sqlite
